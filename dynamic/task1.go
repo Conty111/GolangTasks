@@ -16,18 +16,30 @@
 */
 package dynamic
 
-import "fmt"
-
 func MaxExpressionValue(nums []int) int {
-	n := len(nums)
-	arr_max := make([]int, n+1)
-	for i := n - 1; i >= 0; i-- {
-		arr_max[i] = max(arr_max[i+1], nums[i])
+	if len(nums) < 4 {
+		return 0
 	}
-	fmt.Println(arr_max)
-	arr_ans := make([]int, n+1)
-	for i := n - 3; i >= 0; i-- {
-		arr_ans[i] = max(arr_ans[i+1], arr_max[i+2]-nums[i+1]+arr_max[i+1]-nums[i])
+	first := make([]int, len(nums)+1)
+	for i := len(nums) - 1; i >= 0; i-- {
+		first[i] = max(first[i+1], nums[i]) // функция max - возвращает максимальное
 	}
-	return arr_ans[0]
+	second := make([]int, len(nums))
+	for i := len(nums) - 2; i >= 0; i-- {
+		second[i] = max(second[i+1], first[i+1]-nums[i])
+	}
+	arr := make([]int, len(nums)+1)
+	var tmp int = nums[0]
+	for i := 1; i < len(nums)+1; i++ {
+		arr[i] = max(arr[i-1], nums[i-1]-tmp)
+		if tmp > nums[i-1] {
+			tmp = nums[i-1]
+		}
+	}
+	arr = arr[1:]
+	var res int
+	for i := 1; i < len(nums)-2; i++ {
+		res = max(res, arr[i]+second[i+1])
+	}
+	return res
 }

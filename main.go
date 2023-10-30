@@ -2,18 +2,19 @@ package main
 
 import (
 	"fmt"
-	"github.com/Conty111/GolangTasks/game_of_life"
-	"time"
+	"github.com/Conty111/GolangTasks/OOP"
 )
 
 func main() {
-	newWorld := game_of_life.NewWorld(10, 10)
-	newWorld.Seed()
-	for {
-		fmt.Print(newWorld.String())
-		newWorld.Next()
-		time.Sleep(200 * time.Millisecond)
-		// специальная последовательность для очистки экрана после каждого шага
-		fmt.Print("\033[H\033[2J")
-	}
+	//world := game_of_life.NewWorld(10, 30)
+	//world.Seed()
+	//for {
+	//	fmt.Println(world.String())
+	//	world.Next()
+	//	time.Sleep(50 * time.Millisecond)
+	//	fmt.Print("\033[H\033[2J")
+	//}
+	var test OOP.Vehicle
+	test = OOP.Motorcycle{Speed: 12.4, Type: "SomeType", FuelType: "Some1"}
+	fmt.Println(test)
 }

@@ -32,7 +32,7 @@ func NewWorld(height, width int) *World {
 func (w *World) Seed() {
 	for i := 0; i < w.Height; i++ {
 		for j := 0; j < w.Width; j++ {
-			if rand.Intn(5) == 1 {
+			if rand.Intn(7) == 1 {
 				w.Cells[i][j] = true
 			}
 		}

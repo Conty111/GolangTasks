@@ -1,5 +1,6 @@
 /*
 Сортировка сотрудников предприятия
+
 На предприятии работают несколько cсотрудников. Каждый из них имеет свою должность,
 фиксированную месячную заработную плату, и стаж работы.
 Напишите программу в котором тип Company реализует следующий интерфейс:
@@ -22,6 +23,7 @@ SortWorkers - метод сортировки, который сортирует
 Допустимые должности в порядке убывания: "директор", "зам. директора", "начальник цеха", "мастер", "рабочий".
 
 Примечания
+
 Пример отсортированного вывода:
 Михаил - 12000 - директор
 Андрей - 11800 - мастер
@@ -35,7 +37,7 @@ import (
 	"slices"
 )
 
-var positions = []string{"директор", "зам.директора", "начальник цеха", "мастер", "рабочий"}
+var positions = []string{"директор", "зам. директора", "начальник цеха", "мастер", "рабочий"}
 
 type CompanyInterface interface {
 	AddWokerInfo(name, position string, salary, experience uint) error
@@ -68,8 +70,7 @@ func (z *Company) AddWokerInfo(name, position string, salary, experience uint) e
 }
 
 func (z *Company) SortWorkers() ([]string, error) {
-	tmp := z.Workers
-	slices.SortFunc(tmp, func(a, b Worker) int {
+	slices.SortFunc(z.Workers, func(a, b Worker) int {
 		var res int
 		res = checkSalary(&a, &b)
 		if res == 0 {
@@ -77,8 +78,8 @@ func (z *Company) SortWorkers() ([]string, error) {
 		}
 		return res
 	})
-	res := make([]string, len(tmp))
-	for idx, elem := range tmp {
+	res := make([]string, len(z.Workers))
+	for idx, elem := range z.Workers {
 		row := fmt.Sprintf("%s - %d - %s", elem.Name, elem.Salary*elem.ExperienceYears*12, elem.Position)
 		res[idx] = row
 	}
@@ -86,9 +87,9 @@ func (z *Company) SortWorkers() ([]string, error) {
 }
 
 func checkSalary(a, b *Worker) int {
-	if a.Salary*(a.ExperienceYears*12) > b.Salary*(b.ExperienceYears*12) {
+	if a.Salary*(a.ExperienceYears) > b.Salary*(b.ExperienceYears) {
 		return -1
-	} else if a.Salary*(a.ExperienceYears*12) < b.Salary*(b.ExperienceYears*12) {
+	} else if a.Salary*(a.ExperienceYears) < b.Salary*(b.ExperienceYears) {
 		return 1
 	}
 	return 0
@@ -114,3 +115,7 @@ func checkPosition(a, b *Worker) int {
 	}
 	return 0
 }
+
+//[Михаил - 12000 - директор Андрей - 10800 - мастер Игорь - 6480 - зам. директора Николай - 2880 - начальник цеха Виктор - 2880 - рабочий]
+//[Михаил - 12000 - директор Андрей - 10800 - мастер Николай - 2880 - начальник цеха Виктор - 2880 - рабочий]
+//[Михаил - 12000 - директор Андрей - 10800 - мастер Николай - 2880 - начальник цеха Виктор - 2880 - рабочий]

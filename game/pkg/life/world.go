@@ -1,10 +1,11 @@
-package game_of_life
+package life
 
 import (
 	"bufio"
 	"fmt"
 	"math/rand"
 	"os"
+	"time"
 )
 
 type World struct {
@@ -17,8 +18,14 @@ const brownSquare = "\xF0\x9F\x9F\xAB "
 const greenSquare = "\xF0\x9F\x9F\xA9 "
 const testSquare = "\xF0\x9F\x9F\xA2 "
 
-func NewWorld(height, width int) *World {
-	world := &World{
+func NewWorld(height, width int) (World, error) {
+	if height <= 0 {
+		return World{}, fmt.Errorf("Invalid height")
+	}
+	if width <= 0 {
+		return World{}, fmt.Errorf("Invalid height")
+	}
+	world := World{
 		Height: height,
 		Width:  width,
 	}
@@ -26,16 +33,39 @@ func NewWorld(height, width int) *World {
 	for i := 0; i < height; i++ {
 		world.Cells[i] = make([]bool, width)
 	}
-	return world
+	return world, nil
 }
 
-func (w *World) Seed() {
-	for i := 0; i < w.Height; i++ {
-		for j := 0; j < w.Width; j++ {
-			if rand.Intn(7) == 1 {
-				w.Cells[i][j] = true
+func (w *World) fillAlive(num int) {
+	aliveCount := 0
+	for j, row := range w.Cells {
+		for k := range row {
+			w.Cells[j][k] = true
+			aliveCount++
+			if aliveCount == num {
+
+				return
 			}
 		}
+	}
+}
+
+func (w *World) RandInit(percentage int) {
+	// Количество живых клеток
+	numAlive := percentage * w.Height * w.Width / 100
+	// Заполним живыми первые клетки
+	w.fillAlive(numAlive)
+	// Получаем рандомные числа
+	r := rand.New(rand.NewSource(time.Now().Unix()))
+
+	// Рандомно меняем местами
+	for i := 0; i < w.Height*w.Width; i++ {
+		randRowLeft := r.Intn(w.Width)
+		randColLeft := r.Intn(w.Height)
+		randRowRight := r.Intn(w.Width)
+		randColRight := r.Intn(w.Height)
+
+		w.Cells[randRowLeft][randColLeft] = w.Cells[randRowRight][randColRight]
 	}
 }
 
@@ -114,12 +144,16 @@ func (w *World) String() string {
 	return res
 }
 
-func (w *World) Next() {
-	for i := 0; i < w.Height; i++ {
-		for j := 0; j < w.Width; j++ {
-			w.Cells[i][j] = w.NextState(j, i)
-		}
+func (w *World) Next(x, y int) bool {
+	current_state := w.Cells[x][y]
+	neighboardsLive := w.Neighbors(x, y)
+	if neighboardsLive == 3 {
+		return true
 	}
+	if current_state && neighboardsLive == 2 {
+		return true
+	}
+	return false
 }
 
 func (w *World) Neighbors(x, y int) int {
@@ -150,14 +184,10 @@ func (w *World) Neighbors(x, y int) int {
 	return res
 }
 
-func (w *World) NextState(x, y int) bool {
-	current_state := w.Cells[y][x]
-	neighboardsLive := w.Neighbors(x, y)
-	if neighboardsLive == 3 {
-		return true
+func NextState(oldWorld, newWorld World) {
+	for i := 0; i < oldWorld.Height; i++ {
+		for j := 0; j < oldWorld.Width; j++ {
+			newWorld.Cells[i][j] = oldWorld.Next(i, j)
+		}
 	}
-	if current_state && neighboardsLive == 2 {
-		return true
-	}
-	return false
 }

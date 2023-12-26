@@ -1,18 +1,16 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"github.com/Conty111/GolangTasks/ctx_concurrency"
+	"github.com/Conty111/GolangTasks/sync_patterns"
 	"log"
-	"time"
 )
 
 func main() {
-	res := ctx_concurrency.FetchAPI(context.Background(), []string{"https://2ip.ru", "https://2ip.ru", "https://ya.ru", "https://y111a.ru", "https://practice.geeksforgeeks.org/"}, time.Second*15)
-	for _, e := range res {
-		log.Println(e.URL, e.Err, e.StatusCode)
-	}
+	go sync_patterns.Start()
+	//log.Println(sync_patterns.Compare("test", "good"))
+	log.Println(sync_patterns.Average([]string{"test", "good", "bad", "test", "test"}))
+	log.Println(sync_patterns.BestStudents([]string{"test", "good", "bad", "test", "test"}))
 }
 
 func t2() {

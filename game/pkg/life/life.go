@@ -184,7 +184,7 @@ func (w *World) Neighbors(x, y int) int {
 	return res
 }
 
-func NextState(oldWorld, newWorld World) {
+func NextState(oldWorld, newWorld *World) {
 	for i := 0; i < oldWorld.Height; i++ {
 		for j := 0; j < oldWorld.Width; j++ {
 			newWorld.Cells[i][j] = oldWorld.Next(i, j)

@@ -1,24 +1,127 @@
 package main
 
 import (
-	"github.com/Conty111/GolangTasks/sortirovki"
+	"context"
+	"fmt"
+	"github.com/Conty111/GolangTasks/ctx_concurrency"
 	"log"
+	"time"
 )
 
 func main() {
-	//var x float32 = 1
-	//log.Print(x / -0)
-	//arr := []string{"Vasya", "Vasyaa", "Anatol", "Anna", "Bob"}
-	//sortirovki.SortNames(arr)
-	workers := []sortirovki.Worker{
-		{Name: "Михаил", Position: "директор", Salary: 200, ExperienceYears: 5},
-		{Name: "Игорь", Position: "зам. директора", Salary: 180, ExperienceYears: 3},
-		{Name: "Николай", Position: "начальник цеха", Salary: 120, ExperienceYears: 2},
-		{Name: "Андрей", Position: "мастер", Salary: 90, ExperienceYears: 10},
-		{Name: "Виктор", Position: "рабочий", Salary: 80, ExperienceYears: 3},
+	res := ctx_concurrency.FetchAPI(context.Background(), []string{"https://2ip.ru", "https://2ip.ru", "https://ya.ru", "https://y111a.ru", "https://practice.geeksforgeeks.org/"}, time.Second*15)
+	for _, e := range res {
+		log.Println(e.URL, e.Err, e.StatusCode)
 	}
-	zavod := sortirovki.Company{
-		Workers: workers,
+}
+
+func t2() {
+	var t int
+	fmt.Scan(&t)
+	for ti := 0; ti < t; ti++ {
+		var n int
+		fmt.Scan(&n)
+		arr := make([]int, n)
+		for i := 0; i < n; i++ {
+			fmt.Scan(&arr[i])
+		}
+		if n < 3 {
+			fmt.Println("Yes")
+			continue
+		}
+		mx := make([][]int, n)
+		can := true
+		for {
+			min_val := 1000000001
+			min_idx := -1
+			max_val := 0
+			max_idx := -1
+			for idx, val := range arr {
+				if min_val > val && val > 0 {
+					min_val = val
+					min_idx = idx
+				}
+				if max_val < val {
+					max_val = val
+					max_idx = idx
+				}
+			}
+			//fmt.Println(arr, min_val, max_val)
+			if min_idx == max_idx {
+				if min_idx == -1 {
+					break
+				}
+				for idx, val := range arr {
+					if max_val == val && idx != min_idx {
+						max_val = val
+						max_idx = idx
+						break
+					}
+				}
+				if min_idx == max_idx {
+					can = false
+					break
+				}
+			}
+			arr[min_idx] -= 1
+			arr[max_idx] -= 1
+			mx[min_idx] = append(mx[min_idx], max_idx)
+			mx[max_idx] = append(mx[max_idx], min_idx)
+		}
+		if !can {
+			fmt.Println("No")
+			continue
+		}
+		used := make([]bool, n)
+		var dfs func(v int)
+		dfs = func(v int) {
+			//fmt.Println(v, used)
+			used[v] = true
+			for _, u := range mx[v] {
+				if !used[u] {
+					dfs(u)
+				}
+			}
+		}
+		dfs(0)
+		isAll := true
+		for _, val := range used {
+			if !val {
+				isAll = false
+				break
+			}
+		}
+		if !isAll {
+			fmt.Println("No")
+		} else {
+			fmt.Println("Yes")
+		}
 	}
-	log.Print(zavod.SortWorkers())
+}
+
+func t1() {
+	var t int
+	fmt.Scan(&t)
+	right_lett := make(map[rune]int, 7)
+	for _, l := range "TINKOFF" {
+		right_lett[l] += 1
+	}
+	for i := 0; i < t; i++ {
+		var str string
+		fmt.Scanln(&str)
+		if len(str) != 7 {
+			fmt.Println("No")
+			continue
+		}
+		letters := make(map[rune]int, 7)
+		for _, let := range str {
+			letters[let] += 1
+			val, ok := right_lett[let]
+			if !ok || val < letters[let] {
+				fmt.Println("No")
+				break
+			}
+		}
+		fmt.Println("Yes")
+	}
 }

@@ -30,9 +30,9 @@ import (
 	"unsafe"
 )
 
-type Node struct {
+type Node1 struct {
 	value int
-	next  *Node
+	next  *Node1
 }
 
 type LockFreeQueue struct {
@@ -41,47 +41,57 @@ type LockFreeQueue struct {
 }
 
 func NewLockFreeQueue() *LockFreeQueue {
-	return &LockFreeQueue{}
+	node := &Node1{}
+	return &LockFreeQueue{
+		head: unsafe.Pointer(node),
+		tail: unsafe.Pointer(node),
+	}
 }
 
 func (q *LockFreeQueue) Enqueue(value int) {
-	if q.head != nil {
-		node := &Node{value: value}
-		oldTail := (*Node)(atomic.LoadPointer(&q.tail))
-		node.next = oldTail
-		atomic.CompareAndSwapPointer(&q.tail, unsafe.Pointer(oldTail), unsafe.Pointer(node))
-	} else {
-		q.head = unsafe.Pointer(&Node{value: value})
+	newNode := &Node1{value: value}
+
+	for {
+		tail := (*Node1)(atomic.LoadPointer(&q.tail))
+		next := tail.next
+
+		if next == nil {
+			// Попытка добавить новый узел
+			if atomic.CompareAndSwapPointer((*unsafe.Pointer)(unsafe.Pointer(&tail.next)), nil, unsafe.Pointer(newNode)) {
+				// Успешно добавлен новый узел, обновляем tail
+				atomic.CompareAndSwapPointer(&q.tail, unsafe.Pointer(tail), unsafe.Pointer(newNode))
+				return
+			}
+		} else {
+			// Узел уже добавлен другой горутиной, обновляем tail
+			atomic.CompareAndSwapPointer(&q.tail, unsafe.Pointer(tail), unsafe.Pointer(next))
+		}
+
 	}
 }
 
 func (q *LockFreeQueue) Dequeue() (int, bool) {
-	var val int
-	var res bool
-	if q.head != nil {
-		oldHead := (*Node)(atomic.LoadPointer(&q.head))
-		val = oldHead.value
-		res = true
-		if q.tail == nil {
-			q.head = nil
+	for {
+		head := q.head
+		tail := q.tail
+		first := unsafe.Pointer((*Node1)(atomic.LoadPointer(&head)).next)
+
+		if head == q.head {
+			if head == tail {
+				// Очередь пуста
+				if first == nil {
+					return 0, false
+				}
+				// Обновляем tail, так как другие горутины добавили узлы
+				atomic.CompareAndSwapPointer(&q.tail, tail, first)
+			} else {
+				// Читаем значение из узла
+				value := (*Node1)(first).value
+				// Пробуем обновить head
+				if atomic.CompareAndSwapPointer(&q.head, head, first) {
+					return value, true
+				}
+			}
 		}
 	}
-	if q.tail != nil {
-		var prev unsafe.Pointer
-		currPtr := q.tail
-		curr := (*Node)(currPtr)
-		for curr.next != nil {
-			prev = currPtr
-			atomic.CompareAndSwapPointer(&currPtr, currPtr, unsafe.Pointer(curr.next))
-			curr = (*Node)(currPtr)
-		}
-		node := (*Node)(prev)
-		node.next = nil
-		if q.head == nil {
-			val = curr.value
-			res = true
-		}
-		atomic.CompareAndSwapPointer(&q.head, q.head, prev)
-	}
-	return val, res
 }

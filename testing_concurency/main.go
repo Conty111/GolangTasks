@@ -1,4 +1,4 @@
-package concurency_testing
+package testing_concurency
 
 import (
 	"slices"

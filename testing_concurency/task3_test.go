@@ -13,7 +13,7 @@ func ReverseString(input string) string {
 Функцию ReverseString реализовывать не нужно.
 */
 
-package concurency_testing
+package testing_concurency
 
 import "testing"
 

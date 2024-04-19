@@ -42,7 +42,6 @@ func AreAnagrams(str1, str2 string) bool {
 	sort.Slice(r1, func(i, j int) bool {
 		return r1[i] < r1[j]
 	})
-
 	sort.Slice(r2, func(i, j int) bool {
 		return r2[i] < r2[j]
 	})

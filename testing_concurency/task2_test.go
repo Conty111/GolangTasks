@@ -15,7 +15,7 @@ func Contains(numbers []int, target int) bool{
 
 */
 
-package concurency_testing
+package testing_concurency
 
 import "testing"
 

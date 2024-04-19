@@ -6,7 +6,7 @@
 Функцию SortIntegers реализовывать не нужно.
 */
 
-package concurency_testing
+package testing_concurency
 
 import (
 	"slices"

@@ -26,7 +26,7 @@ func AreAnagrams(str1, str2 string) bool {
 
 */
 
-package concurency_testing
+package testing_concurency
 
 import "testing"
 

@@ -1,7 +1,9 @@
 package main
 
-import "github.com/Conty111/GolangTasks/tinkoff_algorithms"
+import (
+	"github.com/Conty111/GolangTasks/ozon_techpoint"
+)
 
 func main() {
-	tinkoff_algorithms.Task6()
+	ozon_techpoint.Train2()
 }
